@@ -1,5 +1,5 @@
-$ADMIN_USERNAME=$1
-$ADMIN_PASSWORD=$2
+ADMIN_USERNAME=$1
+ADMIN_PASSWORD=$2
 
 cd /tmp/
 echo "test" >> "deploy.log"
