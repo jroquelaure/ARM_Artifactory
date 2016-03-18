@@ -2,8 +2,8 @@ ADMIN_USERNAME=$1
 ADMIN_PASSWORD=$2
 
 cd /tmp/
-echo "test" >> "deploy.log"
-echo $@ >> "test.log"
+echo  $ADMIN_USERNAME >> "deploy.log"
+echo $ADMIN_PASSWORD
 #install oracle java
 sudo -u $ADMIN_USERNAME -p $ADMIN_PASSWORD yum -y install wget
 wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/8u74-b02/jdk-8u74-linux-x64.rpm
