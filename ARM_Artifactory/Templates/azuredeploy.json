@@ -1,0 +1,227 @@
+﻿{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "artyfactorystorageType": {
+            "type": "string",
+            "defaultValue": "Standard_LRS",
+            "allowedValues": [
+                "Standard_LRS",
+                "Standard_ZRS",
+                "Standard_GRS",
+                "Standard_RAGRS",
+                "Premium_LRS"
+            ]
+        },
+        "artifactoryVMName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "artifactoryVMAdminUserName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "artifactoryVMAdminPassword": {
+            "type": "securestring"
+        },
+        "artifactoryPublicIPDnsName": {
+            "type": "string",
+            "minLength": 1
+        }
+    },
+  "variables": {
+    "artyfactorystorageName": "[concat('artifstorage', '3945')]",
+    "artifactoryVirtualNetworkPrefix": "10.0.0.0/16",
+    "artifactoryVirtualNetworkSubnet1Name": "Subnet-1",
+    "artifactoryVirtualNetworkSubnet1Prefix": "10.0.0.0/24",
+    "artifactoryVirtualNetworkSubnet2Name": "Subnet-2",
+    "artifactoryVirtualNetworkSubnet2Prefix": "10.0.1.0/24",
+    "artifactoryVMImagePublisher": "OpenLogic",
+    "artifactoryVMImageOffer": "CentOS",
+    "artifactoryVMOSDiskName": "artifactoryVMOSDisk",
+    "artifactoryVMSKU": "7.1",
+    "artifactoryVMVmSize": "Standard_D1",
+    "artifactoryVMVnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'artifactoryVirtualNetwork')]",
+    "artifactoryVMSubnetRef": "[concat(variables('artifactoryVMVnetID'), '/subnets/', variables('artifactoryVirtualNetworkSubnet1Name'))]",
+    "artifactoryVMStorageAccountContainerName": "vhds",
+    "artifactoryVMNicName": "[concat(parameters('artifactoryVMName'), 'NetworkInterface')]",
+      "artifactoryPublicIPName": "artifactoryPublicIP"
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "artifactoryNetworkSecurityGroup",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "SSH",
+            "properties": {
+              "description": "Allows SSH traffic",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "22",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "HTTP",
+            "properties": {
+              "description": "Allows HTTP traffic",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "8081",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 110,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('artyfactorystorageName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "artyfactorystorage"
+      },
+      "properties": {
+        "accountType": "[parameters('artyfactorystorageType')]"
+      }
+    },
+    {
+      "name": "artifactoryVirtualNetwork",
+      "type": "Microsoft.Network/virtualNetworks",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "artifactoryVirtualNetwork"
+      },
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('artifactoryVirtualNetworkPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('artifactoryVirtualNetworkSubnet1Name')]",
+            "properties": {
+              "addressPrefix": "[variables('artifactoryVirtualNetworkSubnet1Prefix')]"
+            }
+          },
+          {
+            "name": "[variables('artifactoryVirtualNetworkSubnet2Name')]",
+            "properties": {
+              "addressPrefix": "[variables('artifactoryVirtualNetworkSubnet2Prefix')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('artifactoryVMNicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/', 'artifactoryVirtualNetwork')]",
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('artifactoryPublicIPName'))]"
+      ],
+      "tags": {
+        "displayName": "artifactoryVMNic"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('artifactoryVMSubnetRef')]"
+              },
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('artifactoryPublicIPName'))]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[parameters('artifactoryVMName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', variables('artyfactorystorageName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('artifactoryVMNicName'))]"
+      ],
+      "tags": {
+        "displayName": "artifactoryVM"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('artifactoryVMVmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[parameters('artifactoryVMName')]",
+          "adminUsername": "[parameters('artifactoryVMAdminUsername')]",
+          "adminPassword": "[parameters('artifactoryVMAdminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('artifactoryVMImagePublisher')]",
+            "offer": "[variables('artifactoryVMImageOffer')]",
+            "sku": "[variables('artifactoryVMSKU')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "artifactoryVMOSDisk",
+            "vhd": {
+              "uri": "[concat('http://', variables('artyfactorystorageName'), '.blob.core.windows.net/', variables('artifactoryVMStorageAccountContainerName'), '/', variables('artifactoryVMOSDiskName'), '.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('artifactoryVMNicName'))]"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "[variables('artifactoryPublicIPName')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "artifactoryPublicIP"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('artifactoryPublicIPDnsName')]"
+        }
+      }
+    }
+  ],
+    "outputs": {
+    }
+}
