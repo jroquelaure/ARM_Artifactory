@@ -3,10 +3,10 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "artifactoryPublicIPDnsName": {
-            "value": "artifvmoncentosazure2610"
+            "value": "artifa34665oncentosazure"
         },
         "artifactoryVMName": {
-            "value": "testCentOS"
+            "value": "jfartifactoryCentOS"
         },
         "artifactoryVMAdminUserName": {
             "value": "kermit"

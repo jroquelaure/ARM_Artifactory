@@ -30,7 +30,7 @@
         }
     },
   "variables": {
-    "artyfactorystorageName": "[concat('artifstorage', '3945')]",
+    "artyfactorystorageName": "[concat('artifstorage', '261084')]",
     "artifactoryVirtualNetworkPrefix": "10.0.0.0/16",
     "artifactoryVirtualNetworkSubnet1Name": "Subnet-1",
     "artifactoryVirtualNetworkSubnet1Prefix": "10.0.0.0/24",
@@ -45,7 +45,10 @@
     "artifactoryVMSubnetRef": "[concat(variables('artifactoryVMVnetID'), '/subnets/', variables('artifactoryVirtualNetworkSubnet1Name'))]",
     "artifactoryVMStorageAccountContainerName": "vhds",
     "artifactoryVMNicName": "[concat(parameters('artifactoryVMName'), 'NetworkInterface')]",
-      "artifactoryPublicIPName": "artifactoryPublicIP"
+    "artifactoryPublicIPName": "artifactoryPublicIP",
+    "installArtifactoryScriptFolder": "[concat('ARM_Artifactory', '/', 'CustomScripts')]",
+    "installArtifactoryScriptFileName": "installArtifactory.sh",
+    "scriptUrl": "https://raw.githubusercontent.com/jroquelaure/ARM_Artifactory/master/ARM_Artifactory/CustomScripts/installArtifactory.sh"
   },
   "resources": [
     {
@@ -203,7 +206,32 @@
             }
           ]
         }
-      }
+      },
+        "resources": [
+            {
+                "name": "installArtifactory",
+                "type": "extensions",
+                "location": "[resourceGroup().location]",
+                "apiVersion": "2015-06-15",
+                "dependsOn": [
+                    "[concat('Microsoft.Compute/virtualMachines/', parameters('artifactoryVMName'))]"
+                ],
+                "tags": {
+                    "displayName": "installArtifactory"
+                },
+                "properties": {
+                    "publisher": "Microsoft.OSTCExtensions",
+                    "type": "CustomScriptForLinux",
+                    "typeHandlerVersion": "1.4",
+                    "settings": {
+                    "fileUris": [
+                      "[variables('scriptUrl')]"
+                    ],
+                    "commandToExecute": "[concat('sh ', variables('installArtifactoryScriptFileName'), ' ', parameters('artifactoryVMAdminUserName'))]"
+                  }
+                }
+            }
+        ]
     },
     {
       "name": "[variables('artifactoryPublicIPName')]",

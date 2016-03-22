@@ -29,6 +29,7 @@
     <Folder Include="Tools\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="CustomScripts\installArtifactory.sh" />
     <None Include="Deployment.targets">
       <Visible>False</Visible>
     </None>
