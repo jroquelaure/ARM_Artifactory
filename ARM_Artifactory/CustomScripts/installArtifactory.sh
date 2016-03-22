@@ -14,4 +14,4 @@ echo 'install artifactory from bintray'
 wget https://bintray.com/jfrog/artifactory-pro-rpms/rpm -O bintray-jfrog-artifactory-pro-rpms.repo
 mv  bintray-jfrog-artifactory-pro-rpms.repo /etc/yum.repos.d/
  yum -y install artifactory
-service artifactory start
+#service artifactory start
