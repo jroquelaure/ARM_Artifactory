@@ -1,15 +1,16 @@
-DATABASE_PASS = $1
+export DATABASE_PASS=$1
 
 #this script change the default storage to use installed mysql ressource
 cd /tmp/
 echo  "Install Mysql start" >> "install.log"
 
 #install Mysql with yum
-yum install mysql-server
+rpm -Uvh http://dev.mysql.com/get/mysql-community-release-el7-5.noarch.rpm
+yum -y install mysql-server
 
 #open port for IN/OUT access
--I INPUT -p tcp --dport 3306 -m state --state NEW,ESTABLISHED -j ACCEPT
--I OUTPUT -p tcp --sport 3306 -m state --state ESTABLISHED -j ACCEPT
+#-I INPUT -p tcp --dport 3306 -m state --state NEW,ESTABLISHED -j ACCEPT
+#-I OUTPUT -p tcp --sport 3306 -m state --state ESTABLISHED -j ACCEPT
 
 #start Mysql
 service mysqld start
@@ -23,6 +24,6 @@ mysql -u root -p"$DATABASE_PASS" -e "DELETE FROM mysql.db WHERE Db='test' OR Db=
 mysql -u root -p"$DATABASE_PASS" -e "FLUSH PRIVILEGES"
 
 #create artdb
-mysql -u root -p "$DATABASE_PASS" -e "CREATE DATABASE artdb CHARACTER SET utf8 COLLATE utf8_bin"
-mysql -u root -p "$DATABASE_PASS" -e "GRANT ALL ON artdb.* TO 'artifactory'@'localhost' IDENTIFIED BY 'password'"
-mysql -u root -p "$DATABASE_PASS" -e "FLUSH PRIVILEGES""
+mysql -u root -p"$DATABASE_PASS" -e "CREATE DATABASE artdb CHARACTER SET utf8 COLLATE utf8_bin"
+mysql -u root -p"$DATABASE_PASS" -e "GRANT ALL ON artdb.* TO 'artifactory'@'localhost' IDENTIFIED BY 'password'"
+mysql -u root -p"$DATABASE_PASS" -e "FLUSH PRIVILEGES"

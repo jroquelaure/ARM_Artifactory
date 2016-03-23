@@ -1,4 +1,4 @@
-ADMIN_USERNAME=$1
+export ADMIN_USERNAME=$1
 
 whoami >> /tmp/azuredeploy.log.$$ 2>&1
 

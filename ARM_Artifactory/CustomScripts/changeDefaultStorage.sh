@@ -1,5 +1,5 @@
 #this script change the default storage to use installed mysql ressource
-CONNECTION_STRING=$1
+export CONNECTION_STRING=$1
 
 cd /tmp/
 echo  $CONNECTION_STRING >> "connection.log"
