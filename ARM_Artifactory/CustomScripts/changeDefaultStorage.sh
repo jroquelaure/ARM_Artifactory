@@ -5,8 +5,8 @@ cd /tmp/
 echo  $CONNECTION_STRING >> "connection.log"
 
 #write the new storage.properties file
-printf 'type=mssql\n' >> storage.properties
-printf 'driver=com.microsoft.sqlserver.jdbc.SQLServerDriver\n' >> storage.properties
+printf 'type=mysql\n' >> storage.properties
+printf 'driver=com.mysql.jdbc.Driver\n' >> storage.properties
 printf '%s\n' $CONNECTION_STRING >> storage.properties
 printf 'username=artifactory\n' >> storage.properties
 printf 'password=password\n' >> storage.properties
