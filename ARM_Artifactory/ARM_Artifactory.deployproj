@@ -29,6 +29,8 @@
     <Folder Include="Tools\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="CustomScripts\installMysql.sh" />
+    <Content Include="CustomScripts\changeDefaultStorage.sh" />
     <Content Include="CustomScripts\installArtifactory.sh" />
     <None Include="Deployment.targets">
       <Visible>False</Visible>

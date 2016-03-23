@@ -3,16 +3,25 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "artifactoryPublicIPDnsName": {
-            "value": "artifa34665oncentosazure"
+            "value": "artifa365oncentosazure3"
         },
         "artifactoryVMName": {
-            "value": "jfartifactoryCentOS"
+            "value": "jfartifactoryCentOS2"
         },
         "artifactoryVMAdminUserName": {
             "value": "kermit"
         },
         "artifactoryVMAdminPassword": {
             "value": "S0uloumou31"
+        },
+        "artifactoryDBVMName": {
+            "value": "artifMysql"
+        },
+        "artifactoryMySqlRootPassword": {
+            "value": "Souloumou31"
+        },
+        "artifactoryDBPublicIPDnsName": {
+            "value": "artifdb14641oncentos"
         }
     }
 }

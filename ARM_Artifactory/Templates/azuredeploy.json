@@ -1,36 +1,48 @@
 ﻿{
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
-    "parameters": {
-        "artyfactorystorageType": {
-            "type": "string",
-            "defaultValue": "Standard_LRS",
-            "allowedValues": [
-                "Standard_LRS",
-                "Standard_ZRS",
-                "Standard_GRS",
-                "Standard_RAGRS",
-                "Premium_LRS"
-            ]
-        },
-        "artifactoryVMName": {
-            "type": "string",
-            "minLength": 1
-        },
-        "artifactoryVMAdminUserName": {
-            "type": "string",
-            "minLength": 1
-        },
-        "artifactoryVMAdminPassword": {
-            "type": "securestring"
-        },
-        "artifactoryPublicIPDnsName": {
-            "type": "string",
-            "minLength": 1
-        }
+  "parameters": {
+    "artyfactorystorageType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_ZRS",
+        "Standard_GRS",
+        "Standard_RAGRS",
+        "Premium_LRS"
+      ]
     },
+    "artifactoryVMName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifactoryVMAdminUserName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifactoryVMAdminPassword": {
+      "type": "securestring"
+    },
+    "artifactoryPublicIPDnsName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifactoryDBVMName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifactoryMySqlRootPassword": {
+      "type": "securestring"
+    },
+      "artifactoryDBPublicIPDnsName": {
+          "type": "string",
+          "minLength": 1
+      }
+  },
   "variables": {
-    "artyfactorystorageName": "[concat('artifstorage', '261084')]",
+    "artyfactorystorageName": "[concat('artistorage2', '2610845')]",
+    "artyfactoryDBstorageName": "[concat('artidbstorage2', '2610845')]",
     "artifactoryVirtualNetworkPrefix": "10.0.0.0/16",
     "artifactoryVirtualNetworkSubnet1Name": "Subnet-1",
     "artifactoryVirtualNetworkSubnet1Prefix": "10.0.0.0/24",
@@ -41,14 +53,22 @@
     "artifactoryVMOSDiskName": "artifactoryVMOSDisk",
     "artifactoryVMSKU": "7.1",
     "artifactoryVMVmSize": "Standard_D1",
+    "artifactoryMySQLVmSize": "Standard_D1",
     "artifactoryVMVnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'artifactoryVirtualNetwork')]",
     "artifactoryVMSubnetRef": "[concat(variables('artifactoryVMVnetID'), '/subnets/', variables('artifactoryVirtualNetworkSubnet1Name'))]",
     "artifactoryVMStorageAccountContainerName": "vhds",
     "artifactoryVMNicName": "[concat(parameters('artifactoryVMName'), 'NetworkInterface')]",
+    "artifactoryDBNicName": "[concat(parameters('artifactoryDBVMName'), 'NetworkInterface')]",
     "artifactoryPublicIPName": "artifactoryPublicIP",
     "installArtifactoryScriptFolder": "[concat('ARM_Artifactory', '/', 'CustomScripts')]",
     "installArtifactoryScriptFileName": "installArtifactory.sh",
-    "scriptUrl": "https://raw.githubusercontent.com/jroquelaure/ARM_Artifactory/master/ARM_Artifactory/CustomScripts/installArtifactory.sh"
+    "moveToExternalDBScriptFileName": "moveToExternalDB.sh",
+    "installMysqlScriptFileName": "installMysql.sh",
+    "scriptUrl": "https://raw.githubusercontent.com/jroquelaure/ARM_Artifactory/master/ARM_Artifactory/CustomScripts/",
+    "artifactoryDBNicVnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'artifactoryVirtualNetwork')]",
+    "artifactoryDBNicSubnetRef": "[concat(variables('artifactoryDBNicVnetID'), '/subnets/', variables('artifactoryVirtualNetworkSubnet2Name'))]",
+      "artifsqlserverName": "[concat('artifsqlserver', uniqueString(resourceGroup().id))]",
+      "artifactoryDBPublicIPName": "artifactoryDBPublicIP"
   },
   "resources": [
     {
@@ -85,9 +105,23 @@
               "priority": 110,
               "direction": "Inbound"
             }
+          },
+          {
+            "name": "sql",
+            "properties": {
+              "description": "Allows HTTP traffic",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "3306",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 120,
+              "direction": "Inbound"
+            }
           }
-        ]
-      }
+            ]
+          }
     },
     {
       "name": "[variables('artyfactorystorageName')]",
@@ -97,6 +131,19 @@
       "dependsOn": [ ],
       "tags": {
         "displayName": "artyfactorystorage"
+      },
+      "properties": {
+        "accountType": "[parameters('artyfactorystorageType')]"
+      }
+    },
+    {
+      "name": "[variables('artyfactoryDBstorageName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "artyfactoryDBstorage"
       },
       "properties": {
         "accountType": "[parameters('artyfactorystorageType')]"
@@ -169,7 +216,8 @@
       "apiVersion": "2015-06-15",
       "dependsOn": [
         "[concat('Microsoft.Storage/storageAccounts/', variables('artyfactorystorageName'))]",
-        "[concat('Microsoft.Network/networkInterfaces/', variables('artifactoryVMNicName'))]"
+        "[concat('Microsoft.Network/networkInterfaces/', variables('artifactoryVMNicName'))]",
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('artifactoryDBVMName'))]"
       ],
       "tags": {
         "displayName": "artifactoryVM"
@@ -207,31 +255,100 @@
           ]
         }
       },
-        "resources": [
-            {
-                "name": "installArtifactory",
-                "type": "extensions",
-                "location": "[resourceGroup().location]",
-                "apiVersion": "2015-06-15",
-                "dependsOn": [
-                    "[concat('Microsoft.Compute/virtualMachines/', parameters('artifactoryVMName'))]"
-                ],
-                "tags": {
-                    "displayName": "installArtifactory"
-                },
-                "properties": {
-                    "publisher": "Microsoft.OSTCExtensions",
-                    "type": "CustomScriptForLinux",
-                    "typeHandlerVersion": "1.4",
-                    "settings": {
-                    "fileUris": [
-                      "[variables('scriptUrl')]"
-                    ],
-                    "commandToExecute": "[concat('sh ', variables('installArtifactoryScriptFileName'), ' ', parameters('artifactoryVMAdminUserName'))]"
-                  }
-                }
+      "resources": [
+        {
+          "name": "installArtifactory",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('artifactoryVMName'))]",
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('artifactoryDBVMName'))]"
+          ],
+          "tags": {
+            "displayName": "installArtifactory"
+          },
+          "properties": {
+            "publisher": "Microsoft.OSTCExtensions",
+            "type": "CustomScriptForLinux",
+            "typeHandlerVersion": "1.4",
+            "settings": {
+              "fileUris": [
+                "[concat(variables('scriptUrl'), variables('installArtifactoryScriptFileName'))]"
+              ],
+              "commandToExecute": "[concat('sh ', variables('installArtifactoryScriptFileName'), ' ', parameters('artifactoryVMAdminUserName'),' ', concat('url=jdbc:mysql://', reference(concat('Microsoft.Network/publicIPAddresses/', variables('artifactoryDBPublicIPName'))).dnsSettings.fqdn, ':3306/artdb?characterEncoding=UTF-8&elideSetAutoCommits=true'))]"
             }
-        ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "[parameters('artifactoryDBVMName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', variables('artyfactoryDBstorageName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('artifactoryDBNicName'))]"
+      ],
+      "tags": {
+        "displayName": "artifactoryMySQLVM"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('artifactoryMySQLVmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[parameters('artifactoryDBVMName')]",
+          "adminUsername": "[parameters('artifactoryVMAdminUsername')]",
+          "adminPassword": "[parameters('artifactoryVMAdminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('artifactoryVMImagePublisher')]",
+            "offer": "[variables('artifactoryVMImageOffer')]",
+            "sku": "[variables('artifactoryVMSKU')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "artifactoryVMOSDisk",
+            "vhd": {
+              "uri": "[concat('http://', variables('artyfactoryDBstorageName'), '.blob.core.windows.net/', variables('artifactoryVMStorageAccountContainerName'), '/', variables('artifactoryVMOSDiskName'), '.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('artifactoryDBNicName'))]"
+            }
+          ]
+        }
+      },
+      "resources": [
+        {
+          "apiVersion": "2015-06-15",
+          "type": "extensions",
+          "name": "installMysql",
+          "location": "[resourceGroup().location]",
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('artifactoryDBVMName'))]"
+          ],
+          "properties": {
+            "publisher": "Microsoft.OSTCExtensions",
+            "type": "CustomScriptForLinux",
+            "typeHandlerVersion": "1.4",
+            "settings": {
+              "fileUris": [
+                "[concat(variables('scriptUrl'), variables('installMysqlScriptFileName'))]"
+              ],
+              "commandToExecute": "[concat('sh ', variables('installMysqlScriptFileName'), ' ', parameters('artifactoryMySqlRootPassword'))]"
+            }
+          }
+        }
+      ]
     },
     {
       "name": "[variables('artifactoryPublicIPName')]",
@@ -248,7 +365,52 @@
           "domainNameLabel": "[parameters('artifactoryPublicIPDnsName')]"
         }
       }
-    }
+    },
+    {
+      "name": "[variables('artifactoryDBNicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/', 'artifactoryVirtualNetwork')]",
+          "[concat('Microsoft.Network/publicIPAddresses/', variables('artifactoryDBPublicIPName'))]"
+      ],
+      "tags": {
+        "displayName": "artifactoryDBNic"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('artifactoryDBNicSubnetRef')]"
+              },
+                "publicIPAddress": {
+                    "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('artifactoryDBPublicIPName'))]"
+                }
+            }
+          }
+        ]
+      }
+    },
+      {
+          "name": "[variables('artifactoryDBPublicIPName')]",
+          "type": "Microsoft.Network/publicIPAddresses",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [ ],
+          "tags": {
+              "displayName": "artifactoryDBPublicIP"
+          },
+          "properties": {
+              "publicIPAllocationMethod": "Dynamic",
+              "dnsSettings": {
+                  "domainNameLabel": "[parameters('artifactoryDBPublicIPDnsName')]"
+              }
+          }
+      }
   ],
     "outputs": {
     }
