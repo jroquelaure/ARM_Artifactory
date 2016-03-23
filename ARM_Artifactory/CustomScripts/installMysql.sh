@@ -25,5 +25,5 @@ mysql -u root -p"$DATABASE_PASS" -e "FLUSH PRIVILEGES"
 
 #create artdb
 mysql -u root -p"$DATABASE_PASS" -e "CREATE DATABASE artdb CHARACTER SET utf8 COLLATE utf8_bin"
-mysql -u root -p"$DATABASE_PASS" -e "GRANT ALL ON artdb.* TO 'artifactory'@'localhost' IDENTIFIED BY 'password'"
+mysql -u root -p"$DATABASE_PASS" -e "GRANT ALL ON artdb.* TO 'artifactory'@'%' IDENTIFIED BY 'password'"
 mysql -u root -p"$DATABASE_PASS" -e "FLUSH PRIVILEGES"
