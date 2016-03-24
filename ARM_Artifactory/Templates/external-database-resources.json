@@ -1,0 +1,192 @@
+﻿{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+  "parameters": {
+    "databasePublicIPDnsName": {
+      "type": "string"
+    },
+    "databaseRootPassword": {
+      "type": "securestring"
+    },
+    "databasestorageName": {
+      "type": "string"
+    },
+    "databaseVMName": {
+      "type": "string"
+    },
+    "imageOffer": {
+      "type": "string"
+    },
+    "imagePublisher": {
+      "type": "string"
+    },
+    "imageVersion": {
+      "type": "string"
+    },
+    "sku": {
+      "type": "string"
+    },
+    "virtualNetworkSubnetName": {
+      "type": "string"
+    },
+    "VMAdminPassword": {
+      "type": "securestring"
+    },
+    "VMAdminUserName": {
+      "type": "string"
+    },
+    "vmStorageType": {
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_ZRS",
+        "Standard_GRS",
+        "Standard_RAGRS",
+        "Premium_LRS"
+      ],
+      "defaultValue": "Standard_LRS",
+      "type": "string"
+    }
+  },
+  "variables": {
+    "databaseNicName": "[concat(parameters('databaseVMName'), 'NetworkInterface')]",
+    "databaseNicSubnetRef": "[concat(variables('databaseNicVnetID'), '/subnets/', parameters('VirtualNetworkSubnetName'))]",
+    "databaseNicVnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'artifactoryVirtualNetwork')]",
+    "databasePublicIPName": "databasePublicIP",
+    "VmSize": "Standard_D1",
+    "artifactoryVMOSDiskName": "artifactoryVMOSDisk",
+    "artifactoryVMStorageAccountContainerName": "vhds",
+    "installMysqlScriptFileName": "installMysql.sh",
+    "scriptUrl": "https://raw.githubusercontent.com/jroquelaure/ARM_Artifactory/master/ARM_Artifactory/CustomScripts/"
+  },
+  "resources": [
+    {
+      "name": "[parameters('databasestorageName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "tags": {
+        "displayName": "databasestorage"
+      },
+      "properties": {
+        "accountType": "[parameters('vmStorageType')]"
+      }
+    },
+    {
+      "name": "[variables('databasePublicIPName')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "tags": {
+        "displayName": "databasePublicIP"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('databasePublicIPDnsName')]"
+        }
+      }
+    },
+    {
+      "name": "[variables('databaseNicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('databasePublicIPName'))]"
+      ],
+      "tags": {
+        "displayName": "databaseNic"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('databaseNicSubnetRef')]"
+              },
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('databasePublicIPName'))]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[parameters('databaseVMName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', parameters('databaseStorageName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('databaseNicName'))]"
+      ],
+      "tags": {
+        "displayName": "artifactoryMySQLVM"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('VmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[parameters('databaseVMName')]",
+          "adminUsername": "[parameters('VMAdminUsername')]",
+          "adminPassword": "[parameters('VMAdminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[parameters('imagePublisher')]",
+            "offer": "[parameters('imageOffer')]",
+            "sku": "[parameters('sku')]",
+            "version": "[parameters('imageVersion')]"
+          },
+          "osDisk": {
+            "name": "artifactoryVMOSDisk",
+            "vhd": {
+              "uri": "[concat('http://', parameters('databaseStorageName'), '.blob.core.windows.net/', variables('artifactoryVMStorageAccountContainerName'), '/', variables('artifactoryVMOSDiskName'), '.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('databaseNicName'))]"
+            }
+          ]
+        }
+      },
+      "resources": [
+        {
+          "apiVersion": "2015-06-15",
+          "type": "extensions",
+          "name": "installMysql",
+          "location": "[resourceGroup().location]",
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('databaseVMName'))]"
+          ],
+          "properties": {
+            "publisher": "Microsoft.OSTCExtensions",
+            "type": "CustomScriptForLinux",
+            "typeHandlerVersion": "1.4",
+            "settings": {
+              "fileUris": [
+                "[concat(variables('scriptUrl'), variables('installMysqlScriptFileName'))]"
+              ],
+              "commandToExecute": "[concat('sh ', variables('installMysqlScriptFileName'), ' ', parameters('databaseRootPassword'))]"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "outputs": {
+    "databaseHost": {
+      "type": "string",
+      "value": "[reference(concat('Microsoft.Network/publicIPAddresses/', variables('databasePublicIPName'))).dnsSettings.fqdn]"
+    }
+  }
+}
