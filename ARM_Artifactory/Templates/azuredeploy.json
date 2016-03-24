@@ -42,8 +42,8 @@
   },
   "variables": {
     "artifactoryTemplateUrl": "[concat(variables('templateBaseUrl'),'artifactory-resources.json')]",
-    "artyfactoryDBstorageName": "[concat('artidbstorage2', '2610845')]",
-    "artyfactorystorageName": "[concat('artistorage2', '2610845')]",
+    "artyfactoryDBstorageName": "[concat('artidbstorage5', '2610')]",
+    "artyfactorystorageName": "[concat('artistorage5', '2610845')]",
     "databaseTemplateUrl": "[concat(variables('templateBaseUrl'),'external-database-resources.json')]",
     "OSSettings": {
       "publisher": "OpenLogic",
@@ -51,7 +51,7 @@
       "sku": "7.1",
       "version": "latest"
     },
-    "templateBaseUrl": "https://raw.githubusercontent.com/jroquelaure/ARM_Artifactory/master/ARM_Artifactory/Templates/",
+    "templateBaseUrl": "https://raw.githubusercontent.com/jroquelaure/ARM_Artifactory/ha/ARM_Artifactory/Templates/",
     "VirtualNetworkSettings": {
       "prefix": "10.0.0.0/16",
       "subnet1Name": "Subnet-1",
@@ -161,7 +161,7 @@
         "parameters": {
           "artyfactorystorageType": { "value": "[parameters('artyfactorystorageType')]" },
           "artifactoryVMVmSize": { "value": "Standard_D1" },
-          "artyfactorystorageName": { "value": "[variables('artyfactorystorageName')" },
+          "artyfactorystorageName": { "value": "[variables('artyfactorystorageName')]" },
           "artifactoryVMName": { "value": "[parameters('artifactoryVMName')]" },
           "artifactoryVMAdminUserName": { "value": "[parameters('artifactoryVMAdminUserName')]" },
           "artifactoryVMAdminPassword": { "value": "[parameters('artifactoryVMAdminPassword')]" },
@@ -191,7 +191,7 @@
         "parameters": {
           "databasePublicIPDnsName": { "value": "[parameters('artifactoryDBPublicIPDnsName')]" },
           "databaseRootPassword": { "value": "[parameters('artifactoryMySqlRootPassword')]" },
-          "databasestorageName": { "value": "[variables('artyfactoryDBstorageName')" },
+          "databasestorageName": { "value": "[variables('artyfactoryDBstorageName')]" },
           "databaseVMName": { "value": "[parameters('artifactoryDBVMName')]" },
           "imageOffer": { "value": "[variables('OSSettings').offer]" },
           "imagePublisher": { "value": "[variables('OSSettings').publisher]" },
