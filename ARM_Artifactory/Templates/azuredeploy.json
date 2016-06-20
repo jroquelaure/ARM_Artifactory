@@ -52,6 +52,7 @@
     "artifactoryTemplateUrl": "[concat(variables('templateBaseUrl'),'artifactory-primary-resources.json')]",
     "artyfactoryDBstorageName": "[concat('artidbstorage5', '2610')]",
     "artyfactorystorageName": "[concat('artistorage5', '2610845')]",
+    "FSstorageName": "[concat('artistorage5', '261019845')]",
     "databaseTemplateUrl": "[concat(variables('templateBaseUrl'),'external-database-resources.json')]",
     "filesystemTemplateUrl": "[concat(variables('templateBaseUrl'),'artifactory-fs-resources.json')]",
     "OSSettings": {
@@ -151,6 +152,12 @@
             "properties": {
               "addressPrefix": "[variables('VirtualNetworkSettings').subnet2Prefix]"
             }
+          },
+          {
+            "name": "[variables('VirtualNetworkSettings').subnet3Name]",
+            "properties": {
+              "addressPrefix": "[variables('VirtualNetworkSettings').subnet3Prefix]"
+            }
           }
         ]
       }
@@ -241,7 +248,8 @@
           "FSVirtualNetworkSubnet1Name": { "value": "[variables('VirtualNetworkSettings').Subnet3Name]" },
           "FSVMAdminPassword": { "value": "[parameters('artifactoryVMAdminPassword')]" },
           "FSVMAdminUserName": { "value": "[parameters('artifactoryVMAdminUserName')]" },
-          "databaseHost": { "value": "[reference('ExternalDatabase').outputs.databaseHost.value]" }
+          "databaseHost": { "value": "[reference('ExternalDatabase').outputs.databaseHost.value]" },
+          "FSstorageName": { "value": "[variables('FSstorageName')]" }
         }
       }
     }
