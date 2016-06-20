@@ -38,13 +38,18 @@
     "artifactoryDBPublicIPDnsName": {
       "type": "string",
       "minLength": 1
+    },
+    "artifactoryFSVMName": {
+      "type": "string",
+      "minLength": 1
     }
   },
   "variables": {
-    "artifactoryTemplateUrl": "[concat(variables('templateBaseUrl'),'artifactory-resources.json')]",
+    "artifactoryTemplateUrl": "[concat(variables('templateBaseUrl'),'artifactory-primary-resources.json')]",
     "artyfactoryDBstorageName": "[concat('artidbstorage5', '2610')]",
     "artyfactorystorageName": "[concat('artistorage5', '2610845')]",
     "databaseTemplateUrl": "[concat(variables('templateBaseUrl'),'external-database-resources.json')]",
+    "filesystemTemplateUrl": "[concat(variables('templateBaseUrl'),'artifactory-fs-resources.json')]",
     "OSSettings": {
       "publisher": "OpenLogic",
       "offer": "CentOS",
@@ -57,7 +62,9 @@
       "subnet1Name": "Subnet-1",
       "subnet1Prefix": "10.0.0.0/24",
       "subnet2Name": "Subnet-2",
-      "subnet2Prefix": "10.0.1.0/24"
+      "subnet2Prefix": "10.0.1.0/24",
+      "subnet3Name": "Subnet-3",
+      "subnet3Prefix": "10.0.2.0/24"
     }
   },
   "resources": [
@@ -150,6 +157,7 @@
       "apiVersion": "2015-01-01",
       "dependsOn": [
         "[concat('Microsoft.Resources/deployments/','ExternalDatabase')]",
+        "[concat('Microsoft.Resources/deployments/','FileSystem')]",
         "[concat('Microsoft.Network/networkSecurityGroups/','artifactoryNetworkSecurityGroup')]"
       ],
       "properties": {
@@ -171,7 +179,7 @@
           "imageOffer": { "value": "[variables('OSSettings').offer]" },
           "sku": { "value": "[variables('OSSettings').sku]" },
           "imageVersion": { "value": "[variables('OSSettings').version]" },
-          "databaseHost": {"value": "[reference('ExternalDatabase').outputs.databaseHost.value]"}
+          "clusterHost": { "value": "[reference('FileSystem').outputs.fileSystemHost.value]" }
         }
       }
     },
@@ -203,7 +211,36 @@
           "vmStorageType": { "value": "[parameters('artyfactorystorageType')]" }
         }
       }
+    },
+    {
+      "name": "FileSystem",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/','ExternalDatabase')]",
+        "[concat('Microsoft.Network/virtualNetworks/','artifactoryVirtualNetwork')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('filesystemTemplateUrl')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "FSPublicIPDnsName": { "value": "[parameters('artifactoryDBPublicIPDnsName')]" },
+          "FSVMVmSize": { "value": "Standard_D1" },
+          "FSVMName": { "value": "[parameters('artifactoryFSVMName')]" },
+          "imageOffer": { "value": "[variables('OSSettings').offer]" },
+          "imagePublisher": { "value": "[variables('OSSettings').publisher]" },
+          "imageVersion": { "value": "[variables('OSSettings').version]" },
+          "sku": { "value": "[variables('OSSettings').sku]" },
+          "FSVirtualNetworkSubnet1Name": { "value": "[variables('VirtualNetworkSettings').Subnet3Name]" },
+          "VMAdminPassword": { "value": "[parameters('artifactoryVMAdminPassword')]" },
+          "VMAdminUserName": { "value": "[parameters('artifactoryVMAdminUserName')]" },
+          "databaseHost": { "value": "[reference('ExternalDatabase').outputs.databaseHost.value]" }
+        }
       }
+    }
   ],
   "outputs": {
   }

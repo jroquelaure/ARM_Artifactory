@@ -1,0 +1,170 @@
+﻿{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+  "parameters": {
+    "FSVMVmSize": {
+      "type": "string"
+    },
+    "FSVMName": {
+      "type": "string"
+    },
+    "FSVMAdminUserName": {
+      "type": "string"
+    },
+    "FSVMAdminPassword": {
+      "type": "securestring"
+    },
+    "FSPublicIPDnsName": {
+      "type": "string"
+    },
+    "FSVirtualNetworkSubnet1Name": {
+      "type": "string"
+    },
+    "imagePublisher": {
+      "type": "string"
+    },
+    "imageOffer": {
+      "type": "string"
+    },
+    "sku": {
+      "type": "string"
+    },
+    "imageVersion": {
+      "type": "string"
+    },
+    "databaseHost": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "FSPublicIPName": "FSPublicIP",
+    "FSVMNicName": "[concat(parameters('FSVMName'), 'NetworkInterface')]",
+    "FSVMVnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'FSVirtualNetwork')]",
+    "FSVMOSDiskName": "FSVMOSDisk",
+    "FSVMStorageAccountContainerName": "vhds",
+    "FSVMSubnetRef": "[concat(variables('FSVMVnetID'), '/subnets/', parameters('FSVirtualNetworkSubnet1Name'))]",
+    "installFSScriptFileName": "installArtifactoryCluster.sh",
+    "scriptUrl": "https://raw.githubusercontent.com/jroquelaure/ARM_Artifactory/master/ARM_Artifactory/CustomScripts/"
+  },
+  "resources": [
+    {
+      "name": "[variables('FSPublicIPName')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "tags": {
+        "displayName": "FSPublicIP"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('FSPublicIPDnsName')]"
+        }
+      }
+    },
+    {
+      "name": "[variables('FSVMNicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('FSPublicIPName'))]"
+      ],
+      "tags": {
+        "displayName": "FSVMNic"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('FSVMSubnetRef')]"
+              },
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('FSPublicIPName'))]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[parameters('FSVMName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('FSVMNicName'))]"
+      ],
+      "tags": {
+        "displayName": "FSVM"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('FSVMVmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[parameters('FSVMName')]",
+          "adminUsername": "[parameters('FSVMAdminUsername')]",
+          "adminPassword": "[parameters('FSVMAdminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[parameters('imagePublisher')]",
+            "offer": "[parameters('imageOffer')]",
+            "sku": "[parameters('sku')]",
+            "version": "[parameters('imageVersion')]"
+          },
+          "osDisk": {
+            "name": "FSVMOSDisk",
+            "vhd": {
+              "uri": "[concat('http://', parameters('FSstorageName'), '.blob.core.windows.net/', variables('FSVMStorageAccountContainerName'), '/', variables('FSVMOSDiskName'), '.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('FSVMNicName'))]"
+            }
+          ]
+        }
+      },
+      "resources": [
+        {
+          "name": "installFS",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('FSVMName'))]"
+          ],
+          "tags": {
+            "displayName": "installFS"
+          },
+          "properties": {
+            "publisher": "Microsoft.OSTCExtensions",
+            "type": "CustomScriptForLinux",
+            "typeHandlerVersion": "1.4",
+            "settings": {
+              "fileUris": [
+                "[concat(variables('scriptUrl'), variables('installFSScriptFileName'))]"
+              ],
+              "commandToExecute": "[concat('sh ', variables('installFSScriptFileName'), ' ', parameters('FSVMAdminUserName'),' ', concat('url=jdbc:mysql://', parameters('databaseHost'), ':3306/artdb?characterEncoding=UTF-8&elideSetAutoCommits=true'), ' ', '76b07383dcda344979681e0x2efa5ac50')]"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "outputs": {
+    "fileSystemHost": {
+      "type": "string",
+      "value": "[reference(concat('Microsoft.Network/publicIPAddresses/', variables('FSPublicIPName'))).dnsSettings.fqdn]"
+    }
+  }
+}
