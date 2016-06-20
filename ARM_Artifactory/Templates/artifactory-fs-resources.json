@@ -39,7 +39,7 @@
   "variables": {
     "FSPublicIPName": "FSPublicIP",
     "FSVMNicName": "[concat(parameters('FSVMName'), 'NetworkInterface')]",
-    "FSVMVnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'FSVirtualNetwork')]",
+    "FSVMVnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'artifactoryVirtualNetwork')]",
     "FSVMOSDiskName": "FSVMOSDisk",
     "FSVMStorageAccountContainerName": "vhds",
     "FSVMSubnetRef": "[concat(variables('FSVMVnetID'), '/subnets/', parameters('FSVirtualNetworkSubnet1Name'))]",

@@ -39,6 +39,10 @@
       "type": "string",
       "minLength": 1
     },
+    "FSPublicIPDnsName": {
+      "type": "string",
+      "minLength": 1
+    },
     "artifactoryFSVMName": {
       "type": "string",
       "minLength": 1
@@ -227,7 +231,7 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "FSPublicIPDnsName": { "value": "[parameters('artifactoryDBPublicIPDnsName')]" },
+          "FSPublicIPDnsName": { "value": "[parameters('FSPublicIPDnsName')]" },
           "FSVMVmSize": { "value": "Standard_D1" },
           "FSVMName": { "value": "[parameters('artifactoryFSVMName')]" },
           "imageOffer": { "value": "[variables('OSSettings').offer]" },
@@ -235,8 +239,8 @@
           "imageVersion": { "value": "[variables('OSSettings').version]" },
           "sku": { "value": "[variables('OSSettings').sku]" },
           "FSVirtualNetworkSubnet1Name": { "value": "[variables('VirtualNetworkSettings').Subnet3Name]" },
-          "VMAdminPassword": { "value": "[parameters('artifactoryVMAdminPassword')]" },
-          "VMAdminUserName": { "value": "[parameters('artifactoryVMAdminUserName')]" },
+          "FSVMAdminPassword": { "value": "[parameters('artifactoryVMAdminPassword')]" },
+          "FSVMAdminUserName": { "value": "[parameters('artifactoryVMAdminUserName')]" },
           "databaseHost": { "value": "[reference('ExternalDatabase').outputs.databaseHost.value]" }
         }
       }
