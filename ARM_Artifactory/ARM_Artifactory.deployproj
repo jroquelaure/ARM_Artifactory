@@ -28,6 +28,8 @@
     <Folder Include="Tools\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="CustomScripts\installArtifactoryNode.sh" />
+    <Content Include="CustomScripts\installArtifactoryCluster.sh" />
     <Content Include="CustomScripts\installMysql.sh" />
     <Content Include="CustomScripts\changeDefaultStorage.sh" />
     <Content Include="CustomScripts\installArtifactory.sh" />
