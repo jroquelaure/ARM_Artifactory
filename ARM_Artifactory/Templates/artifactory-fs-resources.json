@@ -37,6 +37,9 @@
     },
     "FSstorageName": {
       "type": "string"
+    },
+    "vmStorageType": {
+      "type": "string"
     }
   },
   "variables": {
@@ -50,6 +53,18 @@
     "scriptUrl": "https://raw.githubusercontent.com/jroquelaure/ARM_Artifactory/master/ARM_Artifactory/CustomScripts/"
   },
   "resources": [
+    {
+      "name": "[parameters('FSstorageName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "tags": {
+        "displayName": "artyfactorystorage"
+      },
+      "properties": {
+        "accountType": "[parameters('vmStorageType')]"
+      }
+    },
     {
       "name": "[variables('FSPublicIPName')]",
       "type": "Microsoft.Network/publicIPAddresses",

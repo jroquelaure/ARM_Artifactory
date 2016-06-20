@@ -249,7 +249,8 @@
           "FSVMAdminPassword": { "value": "[parameters('artifactoryVMAdminPassword')]" },
           "FSVMAdminUserName": { "value": "[parameters('artifactoryVMAdminUserName')]" },
           "databaseHost": { "value": "[reference('ExternalDatabase').outputs.databaseHost.value]" },
-          "FSstorageName": { "value": "[variables('FSstorageName')]" }
+          "FSstorageName": { "value": "[variables('FSstorageName')]" },
+          "vmStorageType": { "value": "[parameters('artyfactorystorageType')]" }
         }
       }
     }
