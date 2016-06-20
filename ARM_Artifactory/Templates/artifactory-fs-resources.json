@@ -59,7 +59,7 @@
       "location": "[resourceGroup().location]",
       "apiVersion": "2015-06-15",
       "tags": {
-        "displayName": "artyfactorystorage"
+        "displayName": "FSstorage"
       },
       "properties": {
         "accountType": "[parameters('vmStorageType')]"
@@ -114,6 +114,7 @@
       "location": "[resourceGroup().location]",
       "apiVersion": "2015-06-15",
       "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', parameters('FSstorageName'))]",
         "[concat('Microsoft.Network/networkInterfaces/', variables('FSVMNicName'))]"
       ],
       "tags": {
