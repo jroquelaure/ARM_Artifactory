@@ -1,9 +1,8 @@
-export ADMIN_USERNAME=$1
-export CLUSTER_IP=$2
-export NODE_IP=$3
-export NODE_ID=$4
-export IS_PRIMARY=$5
-export LICENSE=$6
+export CLUSTER_IP=$1
+export NODE_IP=$2
+export NODE_ID=$3
+export IS_PRIMARY=$4
+export LICENSE=$5
 export CLUSTER_HOME="/mnt/shared/artifactory/clusterhome"
 
 #install oracle java
