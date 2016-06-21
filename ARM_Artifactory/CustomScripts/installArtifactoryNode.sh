@@ -27,9 +27,6 @@ yum -y install nfs-utils nfs-utils-lib
 mkdir -p $CLUSTER_HOME
 mount $CLUSTER_IP:/var/opt/jfrog/artifactory-cluster $CLUSTER_HOME
 
-mkdir $CLUSTER_HOME/ha-etc
-mkdir $CLUSTER_HOME/ha-data
-
 cp -a /var/opt/jfrog/artifactory/etc/. $CLUSTER_HOME/ha-etc
 cp -a /var/opt/jfrog/artifactory/data/. $CLUSTER_HOME/ha-data
 
