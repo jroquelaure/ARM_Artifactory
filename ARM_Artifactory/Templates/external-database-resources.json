@@ -56,7 +56,7 @@
     "artifactoryVMOSDiskName": "artifactoryVMOSDisk",
     "artifactoryVMStorageAccountContainerName": "vhds",
     "installMysqlScriptFileName": "installMysql.sh",
-    "scriptUrl": "https://raw.githubusercontent.com/jroquelaure/ARM_Artifactory/master/ARM_Artifactory/CustomScripts/"
+    "scriptUrl": "https://raw.githubusercontent.com/jroquelaure/ARM_Artifactory/ha/ARM_Artifactory/CustomScripts/"
   },
   "resources": [
     {

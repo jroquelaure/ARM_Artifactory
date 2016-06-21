@@ -50,9 +50,9 @@
   },
   "variables": {
     "artifactoryTemplateUrl": "[concat(variables('templateBaseUrl'),'artifactory-primary-resources.json')]",
-    "artyfactoryDBstorageName": "[concat('artidbstorage5', '2610')]",
-    "artyfactorystorageName": "[concat('artistorage5', '2610845')]",
-    "FSstorageName": "[concat('artistorage5', '261019845')]",
+    "artyfactoryDBstorageName": "[concat('artidbstorage6', '2610')]",
+    "artyfactorystorageName": "[concat('artistorage6', '2610845')]",
+    "FSstorageName": "[concat('artistorage6', '2705587')]",
     "databaseTemplateUrl": "[concat(variables('templateBaseUrl'),'external-database-resources.json')]",
     "filesystemTemplateUrl": "[concat(variables('templateBaseUrl'),'artifactory-fs-resources.json')]",
     "OSSettings": {

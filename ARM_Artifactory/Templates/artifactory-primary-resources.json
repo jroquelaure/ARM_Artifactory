@@ -58,7 +58,7 @@
     "artifactoryVMStorageAccountContainerName": "vhds",
     "artifactoryVMSubnetRef": "[concat(variables('artifactoryVMVnetID'), '/subnets/', parameters('artifactoryVirtualNetworkSubnet1Name'))]",
     "installArtifactoryScriptFileName": "installArtifactoryNode.sh",
-    "scriptUrl": "https://raw.githubusercontent.com/jroquelaure/ARM_Artifactory/master/ARM_Artifactory/CustomScripts/"
+    "scriptUrl": "https://raw.githubusercontent.com/jroquelaure/ARM_Artifactory/ha/ARM_Artifactory/CustomScripts/"
   },
   "resources": [
     {

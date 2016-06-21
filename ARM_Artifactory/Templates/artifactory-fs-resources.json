@@ -50,7 +50,7 @@
     "FSVMStorageAccountContainerName": "vhds",
     "FSVMSubnetRef": "[concat(variables('FSVMVnetID'), '/subnets/', parameters('FSVirtualNetworkSubnet1Name'))]",
     "installFSScriptFileName": "installArtifactoryCluster.sh",
-    "scriptUrl": "https://raw.githubusercontent.com/jroquelaure/ARM_Artifactory/master/ARM_Artifactory/CustomScripts/"
+    "scriptUrl": "https://raw.githubusercontent.com/jroquelaure/ARM_Artifactory/ha/ARM_Artifactory/CustomScripts/"
   },
   "resources": [
     {
