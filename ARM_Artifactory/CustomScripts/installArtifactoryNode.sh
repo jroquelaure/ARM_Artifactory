@@ -32,11 +32,11 @@ mv /var/opt/jfrog/artifactory/data/* $CLUSTER_HOME/ha-data/*
 
 #configure the node
 cd /var/opt/jfrog/artifactory/etc/
-printf 'node.id=%s/n' $NODE_ID >> ha-node.properties
-printf 'cluster.home=%s/n' $CLUSTER_HOME >> ha-node.properties
-printf 'context.url=%s:8081/artifactory/n' $NODE_IP >> ha-node.properties
-printf 'membership.port=10001/n' >> ha-node.properties
-printf 'primary=%s/n' $IS_PRIMARY >> ha-node.properties
+printf 'node.id=%s\n' $NODE_ID >> ha-node.properties
+printf 'cluster.home=%s\n' $CLUSTER_HOME >> ha-node.properties
+printf 'context.url=%s:8081/artifactory\n' $NODE_IP >> ha-node.properties
+printf 'membership.port=10001\n' >> ha-node.properties
+printf 'primary=%s\n' $IS_PRIMARY >> ha-node.properties
 
 #set the license
 printf '%s' $LICENSE >> artifactory.lic
