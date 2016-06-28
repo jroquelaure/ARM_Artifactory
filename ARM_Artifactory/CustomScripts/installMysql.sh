@@ -4,8 +4,12 @@ export DATABASE_PASS=$1
 cd /tmp/
 echo  "Install Mysql start" >> "install.log"
 
+ yum -y install wget
+
 #install Mysql with yum
-rpm -Uvh http://dev.mysql.com/get/mysql-community-release-el7-5.noarch.rpm
+wget http://repo.mysql.com/mysql-community-release-el7-5.noarch.rpm
+rpm -ivh mysql-community-release-el7-5.noarch.rpm
+yum -y update
 yum -y install mysql-server
 
 #open port for IN/OUT access
