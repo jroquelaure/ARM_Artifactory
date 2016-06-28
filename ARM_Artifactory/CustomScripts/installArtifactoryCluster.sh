@@ -22,12 +22,3 @@ printf 'password=password\n' >> storage.properties
 printf 'security.token=%s\n' $SECURITY_TOKEN >> cluster.properties
 
 #install nfs program
-yum -y install nfs-utils nfs-utils-lib
-chkconfig nfs on 
-service rpcbind start
-service nfs start
-
-#TODO change second wildcard with location and find a way to inject nodes'dns in first one
-printf '\n%s           *.*.cloudapp.azure.com(rw,sync,no_root_squash,no_subtree_check)\n' $CLUSTER_HOME >> /etc/exports
-
-exportfs -a

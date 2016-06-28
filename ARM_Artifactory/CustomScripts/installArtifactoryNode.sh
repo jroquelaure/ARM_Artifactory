@@ -21,24 +21,3 @@ cd /opt/jfrog/artifactory/tomcat/lib
 wget -nv --timeout=30 http://repo.jfrog.org/artifactory/remote-repos/mysql/mysql-connector-java/5.1.24/mysql-connector-java-5.1.24.jar  
 
 #mount the NFS client
-yum -y install nfs-utils nfs-utils-lib
-
-#create the shared directory
-mkdir -p $CLUSTER_HOME
-mount $CLUSTER_IP:/var/opt/jfrog/artifactory-cluster $CLUSTER_HOME
-
-cp -a /var/opt/jfrog/artifactory/etc/. $CLUSTER_HOME/ha-etc
-cp -a /var/opt/jfrog/artifactory/data/. $CLUSTER_HOME/ha-data
-
-#configure the node
-cd /var/opt/jfrog/artifactory/etc/
-printf 'node.id=%s\n' $NODE_ID >> ha-node.properties
-printf 'cluster.home=%s\n' $CLUSTER_HOME >> ha-node.properties
-printf 'context.url=%s:8081/artifactory\n' $NODE_IP >> ha-node.properties
-printf 'membership.port=10001\n' >> ha-node.properties
-printf 'primary=%s\n' $IS_PRIMARY >> ha-node.properties
-
-#set the license
-printf '%s' $LICENSE >> artifactory.lic
-
-service artifactory start
