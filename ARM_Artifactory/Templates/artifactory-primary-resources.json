@@ -74,21 +74,6 @@
       }
     },
     {
-      "name": "[variables('artifactoryPublicIPName')]",
-      "type": "Microsoft.Network/publicIPAddresses",
-      "location": "[resourceGroup().location]",
-      "apiVersion": "2015-06-15",
-      "tags": {
-        "displayName": "artifactoryPublicIP"
-      },
-      "properties": {
-        "publicIPAllocationMethod": "Dynamic",
-        "dnsSettings": {
-          "domainNameLabel": "[parameters('artifactoryPublicIPDnsName')]"
-        }
-      }
-    },
-    {
       "name": "[variables('artifactoryVMNicName')]",
       "type": "Microsoft.Network/networkInterfaces",
       "location": "[resourceGroup().location]",
