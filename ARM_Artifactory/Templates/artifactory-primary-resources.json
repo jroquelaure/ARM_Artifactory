@@ -48,10 +48,12 @@
     },
     "imageVersion": {
       "type": "string"
+    },
+    "artifactoryPublicIPName": {
+      "type":  "string"
     }
   },
   "variables": {
-    "artifactoryPublicIPName": "artifactoryPublicIP",
     "artifactoryVMNicName": "[concat(parameters('artifactoryVMName'), 'NetworkInterface')]",
     "artifactoryVMVnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'artifactoryVirtualNetwork')]",
     "artifactoryVMOSDiskName": "artifactoryVMOSDisk",
