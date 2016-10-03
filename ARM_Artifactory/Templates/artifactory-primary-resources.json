@@ -81,7 +81,7 @@
       "location": "[resourceGroup().location]",
       "apiVersion": "2015-06-15",
       "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('artifactoryPublicIPName'))]"
+        "[concat('Microsoft.Network/publicIPAddresses/', parameters('artifactoryPublicIPName'))]"
       ],
       "tags": {
         "displayName": "artifactoryVMNic"
@@ -96,7 +96,7 @@
                 "id": "[variables('artifactoryVMSubnetRef')]"
               },
               "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('artifactoryPublicIPName'))]"
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('artifactoryPublicIPName'))]"
               }
             }
           }
