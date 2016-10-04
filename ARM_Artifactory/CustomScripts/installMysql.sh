@@ -8,6 +8,9 @@ echo  "Install Mysql start" >> "install.log"
 
 #install Mysql with yum
 wget http://repo.mysql.com/mysql-community-release-el7-5.noarch.rpm
+
+yum --enablerepo=mysql56-community clean metadata
+
 rpm -ivh mysql-community-release-el7-5.noarch.rpm
 
 yum -y install mysql-server
