@@ -6,6 +6,9 @@ echo  "Install Mysql start" >> "install.log"
 
  yum -y install wget
 
+
+ yum -y remove mariadb-libs.x86_64
+
 #install Mysql with yum
 yum -y localinstall https://dev.mysql.com/get/mysql57-community-release-el7-8.noarch.rpm
 
