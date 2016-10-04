@@ -6,6 +6,8 @@ echo  "Install Mysql start" >> "install.log"
 
  yum -y install wget
 
+ yum -y clean all
+ yum -y update
 
  yum -y remove mariadb-libs.x86_64
 
