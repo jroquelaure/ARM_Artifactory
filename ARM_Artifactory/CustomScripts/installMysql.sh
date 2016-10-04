@@ -7,13 +7,9 @@ echo  "Install Mysql start" >> "install.log"
  yum -y install wget
 
 #install Mysql with yum
-wget http://repo.mysql.com/mysql-community-release-el7-5.noarch.rpm
+yum -y localinstall https://dev.mysql.com/get/mysql57-community-release-el7-8.noarch.rpm
 
-yum --enablerepo=mysql56-community clean metadata
-
-rpm -ivh mysql-community-release-el7-5.noarch.rpm
-
-yum -y install mysql-server
+yum -y install mysql-community-server
 
 #open port for IN/OUT access
 #-I INPUT -p tcp --dport 3306 -m state --state NEW,ESTABLISHED -j ACCEPT
